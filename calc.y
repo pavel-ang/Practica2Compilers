@@ -10,11 +10,12 @@ extern int col;
 int yylex();
 void yyerror(const char *s);
 
-typedef struct {
-    VarType type;
-    char place[128];
-} CVal;
-
+%code requires {
+    typedef struct {
+        VarType type;
+        char place[128];
+    } CVal;
+}
 FILE *out = NULL;
 
 static int lbl_counter = 0;
@@ -64,7 +65,7 @@ static CVal gen_unary_minus(CVal a) {
     double fval;
     char *sval;
     int bval;
-    Cval cval;
+    CVal cval;
 }
 
 %token <ival> INT_LITERAL
@@ -82,7 +83,7 @@ static CVal gen_unary_minus(CVal a) {
 %token AND OR NOT
 %token LPAREN RPAREN LBRACE RBRACE COMMA SEMICOLON DOT
 
-%type <cval> program stmt stmt_list assign expr or_expr and_expr not_expr rel_expr add_expr mul_expr pow_expr unary primary
+%type <cval> expr or_expr and_expr not_expr rel_expr add_expr mul_expr pow_expr unary primary
 
 %start program
 
