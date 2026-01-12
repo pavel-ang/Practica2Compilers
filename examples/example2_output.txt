@@ -1,8 +1,0 @@
-
-f := 3.140000
-i := 2
-$t1 := MULF f i
-r := $t1
-PARAM r
-CALL PUTF 1
-HALT

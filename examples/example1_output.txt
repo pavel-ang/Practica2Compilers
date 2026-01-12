@@ -1,8 +1,0 @@
-a := 5
-b := 3
-$t1 := MULI b 2
-$t2 := ADDI a $t1
-z := $t2
-PARAM z
-CALL PUTI 1
-HALT
