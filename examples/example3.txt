@@ -1,0 +1,7 @@
+
+cnt := 3;
+i := 0;
+repeat cnt do
+	i := i + 1;
+done
+i;

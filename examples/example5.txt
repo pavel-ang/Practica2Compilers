@@ -1,0 +1,12 @@
+
+/* nested repeat and mixed arithmetic */
+n := 2;
+sum := 0;
+repeat n do
+	i := 0;
+	repeat 3 do
+		i := i + 1;
+		sum := sum + i;
+	done
+done
+sum;
