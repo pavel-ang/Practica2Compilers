@@ -67,25 +67,19 @@
 
 
 /* First part of user prologue.  */
-#line 1 "calc.y"
+#line 11 "calc.y"
 
+/* 2. This block contains C-specific includes and function definitions. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "symtab.h"
 
 extern int yylineno;
 extern int col;
 int yylex();
 void yyerror(const char *s);
 
-%code requires {
-    typedef struct {
-        VarType type;
-        char place[128];
-    } CVal;
-}
 FILE *out = NULL;
 
 static int lbl_counter = 0;
@@ -104,6 +98,7 @@ static void copy_place(char *dst, const char *src) {
 }
 
 static CVal gen_binop(CVal a, CVal b, const char *op_int, const char *op_float, const char *op_symbol) {
+    (void)op_symbol; /* Silences unused parameter warning */
     CVal res;
     if (a.type == TYPE_FLOAT || b.type == TYPE_FLOAT) {
         res.type = TYPE_FLOAT;
@@ -129,7 +124,7 @@ static CVal gen_unary_minus(CVal a) {
     return gen_binop(zero, a, "SUBI", "SUBF", "-");
 }
 
-#line 133 "calc.tab.c"
+#line 128 "calc.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -602,11 +597,11 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    93,    93,   100,   101,   105,   107,   114,   121,   128,
-     155,   165,   183,   187,   188,   192,   193,   197,   198,   202,
-     203,   204,   205,   206,   207,   208,   212,   213,   214,   215,
-     216,   220,   221,   222,   223,   227,   228,   232,   236,   237,
-     242,   247,   260
+       0,    97,    97,   104,   105,   109,   111,   118,   125,   132,
+     159,   169,   187,   191,   192,   196,   197,   201,   202,   206,
+     207,   208,   209,   210,   211,   212,   216,   217,   218,   219,
+     220,   224,   225,   226,   227,   231,   232,   236,   240,   241,
+     246,   251,   264
 };
 #endif
 
@@ -1221,45 +1216,45 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: stmt_list  */
-#line 94 "calc.y"
+#line 98 "calc.y"
     {
       fprintf(out, "HALT\n");
     }
-#line 1229 "calc.tab.c"
+#line 1224 "calc.tab.c"
     break;
 
   case 6: /* stmt: expr SEMICOLON  */
-#line 108 "calc.y"
+#line 112 "calc.y"
       {
           fprintf(out, "PARAM %s\n", (yyvsp[-1].cval).place);
           if ((yyvsp[-1].cval).type == TYPE_FLOAT) fprintf(out, "CALL PUTF, 1\n");
           else fprintf(out, "CALL PUTI, 1\n");
       }
-#line 1239 "calc.tab.c"
+#line 1234 "calc.tab.c"
     break;
 
   case 7: /* stmt: INT IDENTIFIER '[' INT_LITERAL ']' SEMICOLON  */
-#line 115 "calc.y"
+#line 119 "calc.y"
       {
           symtab_add_array((yyvsp[-4].sval), TYPE_INT, (yyvsp[-2].ival));
           Symbol *s = symtab_get((yyvsp[-4].sval));
           if (s) s->base_address = 25;
       }
-#line 1249 "calc.tab.c"
+#line 1244 "calc.tab.c"
     break;
 
   case 8: /* stmt: FLOAT IDENTIFIER '[' INT_LITERAL ']' SEMICOLON  */
-#line 122 "calc.y"
+#line 126 "calc.y"
       {
           symtab_add_array((yyvsp[-4].sval), TYPE_FLOAT, (yyvsp[-2].ival));
           Symbol *s = symtab_get((yyvsp[-4].sval));
           if (s) s->base_address = 25;
       }
-#line 1259 "calc.tab.c"
+#line 1254 "calc.tab.c"
     break;
 
   case 9: /* stmt: REPEAT expr DO stmt_list DONE  */
-#line 129 "calc.y"
+#line 133 "calc.y"
       {
           if ((yyvsp[-3].cval).type != TYPE_INT) {
               fprintf(stderr, "Semantic error: repeat requires integer expression at line %d\n", yylineno);
@@ -1283,11 +1278,11 @@ yyreduce:
               free(Lstart); free(Lend); free(ctr);
           }
       }
-#line 1287 "calc.tab.c"
+#line 1282 "calc.tab.c"
     break;
 
   case 10: /* assign: IDENTIFIER ASSIGN expr  */
-#line 156 "calc.y"
+#line 160 "calc.y"
       {
           Symbol *sym = symtab_get((yyvsp[-2].sval));
           if (!sym) {
@@ -1296,11 +1291,11 @@ yyreduce:
           }
           fprintf(out, "%s := %s\n", (yyvsp[-2].sval), (yyvsp[0].cval).place);
       }
-#line 1300 "calc.tab.c"
+#line 1295 "calc.tab.c"
     break;
 
   case 11: /* assign: IDENTIFIER '[' expr ']' ASSIGN expr  */
-#line 166 "calc.y"
+#line 170 "calc.y"
       {
           Symbol *sym = symtab_get((yyvsp[-5].sval));
           if (!sym || !sym->is_array) {
@@ -1315,193 +1310,193 @@ yyreduce:
               free(addr);
           }
       }
-#line 1319 "calc.tab.c"
+#line 1314 "calc.tab.c"
     break;
 
   case 12: /* expr: or_expr  */
-#line 183 "calc.y"
+#line 187 "calc.y"
               { (yyval.cval) = (yyvsp[0].cval); }
-#line 1325 "calc.tab.c"
+#line 1320 "calc.tab.c"
     break;
 
   case 13: /* or_expr: or_expr OR and_expr  */
-#line 187 "calc.y"
+#line 191 "calc.y"
                           { (yyval.cval) = (yyvsp[-2].cval); }
-#line 1331 "calc.tab.c"
+#line 1326 "calc.tab.c"
     break;
 
   case 14: /* or_expr: and_expr  */
-#line 188 "calc.y"
+#line 192 "calc.y"
                { (yyval.cval) = (yyvsp[0].cval); }
-#line 1337 "calc.tab.c"
+#line 1332 "calc.tab.c"
     break;
 
   case 15: /* and_expr: and_expr AND not_expr  */
-#line 192 "calc.y"
+#line 196 "calc.y"
                             { (yyval.cval) = (yyvsp[-2].cval); }
-#line 1343 "calc.tab.c"
+#line 1338 "calc.tab.c"
     break;
 
   case 16: /* and_expr: not_expr  */
-#line 193 "calc.y"
+#line 197 "calc.y"
                { (yyval.cval) = (yyvsp[0].cval); }
-#line 1349 "calc.tab.c"
+#line 1344 "calc.tab.c"
     break;
 
   case 17: /* not_expr: NOT not_expr  */
-#line 197 "calc.y"
+#line 201 "calc.y"
                    { (yyval.cval) = (yyvsp[0].cval); }
-#line 1355 "calc.tab.c"
+#line 1350 "calc.tab.c"
     break;
 
   case 18: /* not_expr: rel_expr  */
-#line 198 "calc.y"
+#line 202 "calc.y"
                { (yyval.cval) = (yyvsp[0].cval); }
-#line 1361 "calc.tab.c"
+#line 1356 "calc.tab.c"
     break;
 
   case 19: /* rel_expr: rel_expr GT add_expr  */
-#line 202 "calc.y"
+#line 206 "calc.y"
                            { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "GTI", "GTF", ">"); }
-#line 1367 "calc.tab.c"
+#line 1362 "calc.tab.c"
     break;
 
   case 20: /* rel_expr: rel_expr GE add_expr  */
-#line 203 "calc.y"
+#line 207 "calc.y"
                            { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "GEI", "GEF", ">="); }
-#line 1373 "calc.tab.c"
+#line 1368 "calc.tab.c"
     break;
 
   case 21: /* rel_expr: rel_expr LT add_expr  */
-#line 204 "calc.y"
+#line 208 "calc.y"
                            { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "LTI", "LTF", "<"); }
-#line 1379 "calc.tab.c"
+#line 1374 "calc.tab.c"
     break;
 
   case 22: /* rel_expr: rel_expr LE add_expr  */
-#line 205 "calc.y"
+#line 209 "calc.y"
                            { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "LEI", "LEF", "<="); }
-#line 1385 "calc.tab.c"
+#line 1380 "calc.tab.c"
     break;
 
   case 23: /* rel_expr: rel_expr EQ add_expr  */
-#line 206 "calc.y"
+#line 210 "calc.y"
                            { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "EQI", "EQF", "=="); }
-#line 1391 "calc.tab.c"
+#line 1386 "calc.tab.c"
     break;
 
   case 24: /* rel_expr: rel_expr NEQ add_expr  */
-#line 207 "calc.y"
+#line 211 "calc.y"
                             { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "NEQI", "NEQF", "!="); }
-#line 1397 "calc.tab.c"
+#line 1392 "calc.tab.c"
     break;
 
   case 25: /* rel_expr: add_expr  */
-#line 208 "calc.y"
+#line 212 "calc.y"
                { (yyval.cval) = (yyvsp[0].cval); }
-#line 1403 "calc.tab.c"
+#line 1398 "calc.tab.c"
     break;
 
   case 26: /* add_expr: PLUS add_expr  */
-#line 212 "calc.y"
+#line 216 "calc.y"
                     { (yyval.cval) = (yyvsp[0].cval); }
-#line 1409 "calc.tab.c"
+#line 1404 "calc.tab.c"
     break;
 
   case 27: /* add_expr: MINUS add_expr  */
-#line 213 "calc.y"
+#line 217 "calc.y"
                      { (yyval.cval) = gen_unary_minus((yyvsp[0].cval)); }
-#line 1415 "calc.tab.c"
+#line 1410 "calc.tab.c"
     break;
 
   case 28: /* add_expr: add_expr PLUS mul_expr  */
-#line 214 "calc.y"
+#line 218 "calc.y"
                              { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "ADDI", "ADDF", "+"); }
-#line 1421 "calc.tab.c"
+#line 1416 "calc.tab.c"
     break;
 
   case 29: /* add_expr: add_expr MINUS mul_expr  */
-#line 215 "calc.y"
+#line 219 "calc.y"
                               { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "SUBI", "SUBF", "-"); }
-#line 1427 "calc.tab.c"
+#line 1422 "calc.tab.c"
     break;
 
   case 30: /* add_expr: mul_expr  */
-#line 216 "calc.y"
+#line 220 "calc.y"
                { (yyval.cval) = (yyvsp[0].cval); }
-#line 1433 "calc.tab.c"
+#line 1428 "calc.tab.c"
     break;
 
   case 31: /* mul_expr: mul_expr MULT pow_expr  */
-#line 220 "calc.y"
+#line 224 "calc.y"
                              { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "MULI", "MULF", "*"); }
-#line 1439 "calc.tab.c"
+#line 1434 "calc.tab.c"
     break;
 
   case 32: /* mul_expr: mul_expr DIV pow_expr  */
-#line 221 "calc.y"
+#line 225 "calc.y"
                             { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "DIVI", "DIVF", "/"); }
-#line 1445 "calc.tab.c"
+#line 1440 "calc.tab.c"
     break;
 
   case 33: /* mul_expr: mul_expr MOD pow_expr  */
-#line 222 "calc.y"
+#line 226 "calc.y"
                             { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "MODI", "MODF", "%"); }
-#line 1451 "calc.tab.c"
+#line 1446 "calc.tab.c"
     break;
 
   case 34: /* mul_expr: pow_expr  */
-#line 223 "calc.y"
+#line 227 "calc.y"
                { (yyval.cval) = (yyvsp[0].cval); }
-#line 1457 "calc.tab.c"
+#line 1452 "calc.tab.c"
     break;
 
   case 35: /* pow_expr: unary POW pow_expr  */
-#line 227 "calc.y"
+#line 231 "calc.y"
                          { (yyval.cval) = gen_binop((yyvsp[-2].cval), (yyvsp[0].cval), "POWI", "POWF", "**"); }
-#line 1463 "calc.tab.c"
+#line 1458 "calc.tab.c"
     break;
 
   case 36: /* pow_expr: unary  */
-#line 228 "calc.y"
+#line 232 "calc.y"
             { (yyval.cval) = (yyvsp[0].cval); }
-#line 1469 "calc.tab.c"
+#line 1464 "calc.tab.c"
     break;
 
   case 37: /* unary: primary  */
-#line 232 "calc.y"
+#line 236 "calc.y"
               { (yyval.cval) = (yyvsp[0].cval); }
-#line 1475 "calc.tab.c"
+#line 1470 "calc.tab.c"
     break;
 
   case 38: /* primary: LPAREN expr RPAREN  */
-#line 236 "calc.y"
+#line 240 "calc.y"
                          { (yyval.cval) = (yyvsp[-1].cval); }
-#line 1481 "calc.tab.c"
+#line 1476 "calc.tab.c"
     break;
 
   case 39: /* primary: INT_LITERAL  */
-#line 237 "calc.y"
+#line 241 "calc.y"
                   { 
           CVal v; v.type = TYPE_INT; 
           snprintf(v.place, sizeof(v.place), "%d", (yyvsp[0].ival)); 
           (yyval.cval) = v; 
       }
-#line 1491 "calc.tab.c"
+#line 1486 "calc.tab.c"
     break;
 
   case 40: /* primary: FLOAT_LITERAL  */
-#line 242 "calc.y"
+#line 246 "calc.y"
                     { 
           CVal v; v.type = TYPE_FLOAT; 
           snprintf(v.place, sizeof(v.place), "%lf", (yyvsp[0].fval)); 
           (yyval.cval) = v; 
       }
-#line 1501 "calc.tab.c"
+#line 1496 "calc.tab.c"
     break;
 
   case 41: /* primary: IDENTIFIER  */
-#line 247 "calc.y"
+#line 251 "calc.y"
                  {
           CVal v;
           Symbol *s = symtab_get((yyvsp[0].sval));
@@ -1515,11 +1510,11 @@ yyreduce:
           }
           (yyval.cval) = v;
       }
-#line 1519 "calc.tab.c"
+#line 1514 "calc.tab.c"
     break;
 
   case 42: /* primary: IDENTIFIER '[' expr ']'  */
-#line 260 "calc.y"
+#line 264 "calc.y"
                               {
           CVal v;
           Symbol *s = symtab_get((yyvsp[-3].sval));
@@ -1540,11 +1535,11 @@ yyreduce:
           }
           (yyval.cval) = v;
       }
-#line 1544 "calc.tab.c"
+#line 1539 "calc.tab.c"
     break;
 
 
-#line 1548 "calc.tab.c"
+#line 1543 "calc.tab.c"
 
       default: break;
     }
@@ -1737,7 +1732,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 282 "calc.y"
+#line 286 "calc.y"
 
 
 void yyerror(const char *s) {

@@ -44,6 +44,18 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 1 "calc.y"
+
+    /* 1. This block MUST be outside the %{ %} block. 
+       It defines the types Bison needs for the header file. */
+    #include "symtab.h"
+    typedef struct {
+        VarType type;
+        char place[128];
+    } CVal;
+
+#line 59 "calc.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -98,7 +110,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 63 "calc.y"
+#line 67 "calc.y"
 
     int ival;
     double fval;
@@ -106,7 +118,7 @@ union YYSTYPE
     int bval;
     CVal cval;
 
-#line 110 "calc.tab.h"
+#line 122 "calc.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -1,21 +1,25 @@
+%code requires {
+    /* 1. This block MUST be outside the %{ %} block. 
+       It defines the types Bison needs for the header file. */
+    #include "symtab.h"
+    typedef struct {
+        VarType type;
+        char place[128];
+    } CVal;
+}
+
 %{
+/* 2. This block contains C-specific includes and function definitions. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "symtab.h"
 
 extern int yylineno;
 extern int col;
 int yylex();
 void yyerror(const char *s);
 
-%code requires {
-    typedef struct {
-        VarType type;
-        char place[128];
-    } CVal;
-}
 FILE *out = NULL;
 
 static int lbl_counter = 0;
@@ -34,6 +38,7 @@ static void copy_place(char *dst, const char *src) {
 }
 
 static CVal gen_binop(CVal a, CVal b, const char *op_int, const char *op_float, const char *op_symbol) {
+    (void)op_symbol; /* Silences unused parameter warning */
     CVal res;
     if (a.type == TYPE_FLOAT || b.type == TYPE_FLOAT) {
         res.type = TYPE_FLOAT;
@@ -59,7 +64,6 @@ static CVal gen_unary_minus(CVal a) {
     return gen_binop(zero, a, "SUBI", "SUBF", "-");
 }
 %}
-
 %union {
     int ival;
     double fval;
