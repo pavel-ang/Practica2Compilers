@@ -29,6 +29,11 @@ typedef struct {
     Value v;
 } ExprVal;
 
+typedef struct {
+    VarType type;
+    char place[128];
+} CVal;
+
 #define MAX_FIELDS 16
 #define MAX_STRUCTS 32
 

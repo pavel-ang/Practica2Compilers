@@ -1,15 +1,9 @@
 %code requires {
-    /* 1. This block MUST be outside the %{ %} block. 
-       It defines the types Bison needs for the header file. */
     #include "symtab.h"
-    typedef struct {
-        VarType type;
-        char place[128];
-    } CVal;
 }
 
 %{
-/* 2. This block contains C-specific includes and function definitions. */
+#include "symtab.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,50 +14,15 @@ extern int col;
 int yylex();
 void yyerror(const char *s);
 
+/* Function Prototypes (Declarations only) */
+static char *new_label();
+static void copy_place(char *dst, const char *src);
+static CVal gen_binop(CVal a, CVal b, const char *op_int, const char *op_float, const char *op_symbol);
+static CVal gen_unary_minus(CVal a);
+
 FILE *out = NULL;
-
-static int lbl_counter = 0;
-static char *new_label() {
-    char buf[32];
-    lbl_counter++;
-    snprintf(buf, sizeof(buf), "L%d", lbl_counter);
-    char *r = (char*)malloc(strlen(buf)+1);
-    strcpy(r, buf);
-    return r;
-}
-
-static void copy_place(char *dst, const char *src) { 
-    strncpy(dst, src, 127);
-    dst[127]=0; 
-}
-
-static CVal gen_binop(CVal a, CVal b, const char *op_int, const char *op_float, const char *op_symbol) {
-    (void)op_symbol; /* Silences unused parameter warning */
-    CVal res;
-    if (a.type == TYPE_FLOAT || b.type == TYPE_FLOAT) {
-        res.type = TYPE_FLOAT;
-        char *tmp = new_temp();
-        fprintf(out, "%s := %s %s %s\n", tmp, op_float, a.place, b.place);
-        copy_place(res.place, tmp);
-        free(tmp);
-    } else {
-        res.type = TYPE_INT;
-        char *tmp = new_temp();
-        fprintf(out, "%s := %s %s %s\n", tmp, op_int, a.place, b.place);
-        copy_place(res.place, tmp);
-        free(tmp);
-    }
-    return res;
-}
-
-static CVal gen_unary_minus(CVal a) {
-    CVal zero;
-    zero.type = a.type;
-    if (a.type == TYPE_FLOAT) strcpy(zero.place, "0.0"); 
-    else strcpy(zero.place, "0");
-    return gen_binop(zero, a, "SUBI", "SUBF", "-");
-}
 %}
+
 %union {
     int ival;
     double fval;
@@ -285,11 +244,54 @@ primary:
 
 %%
 
+static int lbl_counter = 0;
+static char *new_label() {
+    char buf[32];
+    lbl_counter++;
+    snprintf(buf, sizeof(buf), "L%d", lbl_counter);
+    char *r = (char*)malloc(strlen(buf)+1);
+    strcpy(r, buf);
+    return r;
+}
+
+static void copy_place(char *dst, const char *src) { 
+    strncpy(dst, src, 127);
+    dst[127]=0; 
+}
+
+static CVal gen_binop(CVal a, CVal b, const char *op_int, const char *op_float, const char *op_symbol) {
+    (void)op_symbol; 
+    CVal res;
+    if (a.type == TYPE_FLOAT || b.type == TYPE_FLOAT) {
+        res.type = TYPE_FLOAT;
+        char *tmp = new_temp();
+        fprintf(out, "%s := %s %s %s\n", tmp, op_float, a.place, b.place);
+        copy_place(res.place, tmp);
+        free(tmp);
+    } else {
+        res.type = TYPE_INT;
+        char *tmp = new_temp();
+        fprintf(out, "%s := %s %s %s\n", tmp, op_int, a.place, b.place);
+        copy_place(res.place, tmp);
+        free(tmp);
+    }
+    return res;
+}
+
+static CVal gen_unary_minus(CVal a) {
+    CVal zero;
+    zero.type = a.type;
+    if (a.type == TYPE_FLOAT) strcpy(zero.place, "0.0"); 
+    else strcpy(zero.place, "0");
+    return gen_binop(zero, a, "SUBI", "SUBF", "-");
+}
+
 void yyerror(const char *s) {
     fprintf(stderr, "Syntax error at line %d, col %d: %s\n", yylineno, col, s);
 }
 
 int main(int argc, char **argv) {
+    (void)argc; (void)argv;
     out = stdout;
     symtab_init();
     yyparse();
